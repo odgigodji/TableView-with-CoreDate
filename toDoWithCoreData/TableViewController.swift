@@ -16,17 +16,33 @@ class TableViewController: UITableViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemGray2
         
-        navigationItem.title = "Rick and Morty"
+        navigationItem.title = "ToDo with CoreData"
         
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellId)
 
-        navigationItem.rightBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonTapped))
+        navigationItem.rightBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(plusTask))
     }
     
-    @objc func addButtonTapped() {
-       print("jer")
+    @objc func plusTask() {
+        let alertController = UIAlertController(title: "New task", message: "enter task", preferredStyle: .alert)
+        
+        let saveTask = UIAlertAction(title: "save", style: .default) { action in
+            let tf = alertController.textFields?.first
+            if let newTask = tf?.text {
+                self.tasks.insert(newTask, at: 0)
+                self.tableView.reloadData()
+            }
+        }
+        alertController.addTextField { _ in }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { _ in }
+        
+        alertController.addAction(saveTask)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true)
     }
 
     // MARK: - Table view data source
