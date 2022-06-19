@@ -38,11 +38,35 @@ class TableViewController: UITableViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellId)
+        tableView.allowsSelection = false
 
         navigationItem.rightBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(plusTask))
+        navigationItem.leftBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .stop, target: self, action: #selector(deleteAllTasks))
     }
     
-    @objc func plusTask() {
+    //MARK: - delete tasks
+    @objc private func deleteAllTasks() {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
+        
+        let fetchRequest: NSFetchRequest<Tasks> = Tasks.fetchRequest()
+        if let tasks = try? context.fetch(fetchRequest) {
+            for task in tasks {
+                context.delete(task)
+            }
+        }
+        tasks.removeAll()
+        //MARK: - save context
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
+        tableView.reloadData()
+    }
+    
+    //MARK: - plus task
+    @objc private func plusTask() {
         let alertController = UIAlertController(title: "New task", message: "enter task", preferredStyle: .alert)
         
         let saveTask = UIAlertAction(title: "save", style: .default) { action in
@@ -62,6 +86,7 @@ class TableViewController: UITableViewController {
         present(alertController, animated: true)
     }
     
+    //MARK: - save TAsk
     func saveTask(withTitle title: String) {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let context = appDelegate.persistentContainer.viewContext
@@ -81,14 +106,13 @@ class TableViewController: UITableViewController {
     }
 
     // MARK: - Table view data source
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print(tasks.count)
         return tasks.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
-        cell.backgroundView?.backgroundColor = .yellow
         
         let task = tasks[indexPath.row]
         cell.textLabel?.text = task.title
@@ -98,5 +122,6 @@ class TableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 80
     }
+    
 }
 
