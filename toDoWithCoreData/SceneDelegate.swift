@@ -16,7 +16,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = TableViewController()
+        
+        let mainTableViewController = TableViewController()
+        window?.rootViewController = UINavigationController(rootViewController: mainTableViewController)
+        
         window?.makeKeyAndVisible()
     }
 
