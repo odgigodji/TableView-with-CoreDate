@@ -6,11 +6,28 @@
 //
 
 import UIKit
+import CoreData
 
 class TableViewController: UITableViewController {
 
-    var tasks: [String] = ["a", "b", "c", "d", "e"]
+    var tasks: [Tasks] = []
     let cellId = "cellId"
+    
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        
+        //MARK: - context
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
+        
+        let fetchRequest: NSFetchRequest<Tasks> = Tasks.fetchRequest()
+        do {
+            tasks = try context.fetch(fetchRequest)
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +48,7 @@ class TableViewController: UITableViewController {
         let saveTask = UIAlertAction(title: "save", style: .default) { action in
             let tf = alertController.textFields?.first
             if let newTask = tf?.text {
-                self.tasks.insert(newTask, at: 0)
+                self.saveTask(withTitle: newTask)
                 self.tableView.reloadData()
             }
         }
@@ -44,6 +61,24 @@ class TableViewController: UITableViewController {
         
         present(alertController, animated: true)
     }
+    
+    func saveTask(withTitle title: String) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
+        
+        guard let entity = NSEntityDescription.entity(forEntityName: "Tasks", in: context) else {
+            return
+        }
+        let taskObject = Tasks(entity: entity, insertInto: context)
+        taskObject.title = title
+        
+        do {
+            try context.save()
+            tasks.append(taskObject)
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
+    }
 
     // MARK: - Table view data source
 
@@ -54,7 +89,9 @@ class TableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
         cell.backgroundView?.backgroundColor = .yellow
-        cell.textLabel?.text = tasks[indexPath.row]
+        
+        let task = tasks[indexPath.row]
+        cell.textLabel?.text = task.title
         return cell
     }
     
