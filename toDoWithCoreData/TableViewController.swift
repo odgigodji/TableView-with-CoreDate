@@ -13,7 +13,6 @@ class TableViewController: UITableViewController {
     var tasks: [Tasks] = []
     let cellId = "cellId"
     
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         
@@ -107,7 +106,6 @@ class TableViewController: UITableViewController {
 
     // MARK: - Table view data source
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print(tasks.count)
         return tasks.count
     }
 
